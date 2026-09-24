@@ -85,14 +85,14 @@ test.describe('Dream Portal - Cross-Page Validation', () => {
       'Cross-validating recurring dreams between Diary and Summary pages'
     );
 
-    // Step 1: Navigate to diary page and extract recurring dream names
+    // Navigate to diary page and extract recurring dream names
     const diaryPage = new DreamDiaryPage(page);
     await diaryPage.goto();
 
     const recurringDreams = await diaryPage.getRecurringDreams();
     logger.info(`Recurring dreams from diary: ${recurringDreams.join(', ')}`);
 
-    // Step 2: Verify the expected recurring dream names are found
+    // Verify the expected recurring dream names are found
     TestData.expectedRecurringDreams.forEach((expectedDream) => {
       expect(
         recurringDreams.includes(expectedDream),
@@ -100,7 +100,7 @@ test.describe('Dream Portal - Cross-Page Validation', () => {
       ).toBeTruthy();
     });
 
-    // Step 3: Verify count matches the summary page
+    // Verify count matches the summary page
     const summaryPage = new DreamSummaryPage(page);
     await summaryPage.goto();
 

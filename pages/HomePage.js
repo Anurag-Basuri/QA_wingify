@@ -1,19 +1,15 @@
 const { expect } = require('@playwright/test');
 const Logger = require('../utils/logger');
 
-/**
- * Page Object Model for the Dream Portal Home Page (index.html).
- * Handles loading animation, main content visibility, and navigation.
- */
+// Page Object Model for the Dream Portal home page (index.html)
+// Handles the loading animation, main content, and navigation logic
 class HomePage {
-  /**
-   * @param {import('@playwright/test').Page} page - Playwright page instance
-   */
+  // Set up the page and define all the locators we need
   constructor(page) {
     this.page = page;
     this.logger = new Logger('HomePage');
 
-    // Locators
+    // Locators for all the elements on the page
     this.loadingAnimation = page.locator('#loadingAnimation');
     this.mainContent = page.locator('#mainContent');
     this.dreamButton = page.locator('#dreamButton');
@@ -22,22 +18,16 @@ class HomePage {
     this.spinner = page.locator('.spinner');
   }
 
-  /**
-   * Navigate to the home page.
-   */
+  // Navigate to the home page and wait for the welcome section to appear
   async goto() {
     this.logger.info('Navigating to Dream Portal home page');
     await this.page.goto('./', { waitUntil: 'commit' });
-    // Wait for the welcome section to be attached to DOM
+    // Wait for the welcome section to be attached to the DOM
     await this.welcomeSection.waitFor({ state: 'attached', timeout: 10000 });
     this.logger.info('Home page loaded successfully');
   }
 
-  /**
-   * Check if the loading animation is currently visible.
-   * Uses JavaScript evaluation since the .hidden class uses display:none.
-   * @returns {Promise<boolean>} True if loading animation is visible
-   */
+  // Check if the loading animation is currently visible on screen
   async isLoadingVisible() {
     const result = await this.page.evaluate(() => {
       const el = document.getElementById('loadingAnimation');
@@ -47,13 +37,10 @@ class HomePage {
     return result;
   }
 
-  /**
-   * Wait for the loading animation to disappear.
-   * The animation lasts approximately 3 seconds.
-   */
+  // Wait for the loading animation to disappear (should take about 3 seconds)
   async waitForLoadingToDisappear() {
     this.logger.info('Waiting for loading animation to disappear...');
-    // Wait for the mainContent to become visible and animated (100ms delay after hidden removal)
+    // Wait for the mainContent to become visible with proper animation classes
     await this.page.waitForFunction(
       () => {
         const mainContent = document.getElementById('mainContent');
@@ -68,10 +55,7 @@ class HomePage {
     this.logger.info('Loading animation has disappeared and content is shown');
   }
 
-  /**
-   * Check if main content is visible after loading.
-   * @returns {Promise<boolean>} True if main content is displayed
-   */
+  // Check if the main content area is currently visible on the page
   async isMainContentVisible() {
     const result = await this.page.evaluate(() => {
       const el = document.getElementById('mainContent');
@@ -81,10 +65,7 @@ class HomePage {
     return result;
   }
 
-  /**
-   * Check if the Dream button is visible and clickable.
-   * @returns {Promise<boolean>} True if button is displayed
-   */
+  // Check if the Dream button is visible and ready to click
   async isDreamButtonVisible() {
     const result = await this.page.evaluate(() => {
       const el = document.getElementById('dreamButton');
@@ -94,25 +75,20 @@ class HomePage {
     return result;
   }
 
-  /**
-   * Click the "My Dreams" button, which opens two new tabs:
-   * - dreams-diary.html
-   * - dreams-total.html
-   * @returns {Promise<import('@playwright/test').Page[]>} Array of newly opened pages
-   */
+  // Click the "My Dreams" button which opens two new tabs for dreams-diary and dreams-total
   async clickMyDreamsButton() {
     this.logger.info('Clicking "My Dreams" button');
 
-    // Collect all new pages that open within a short window
+    // Collect all new pages that open in the next few seconds
     const newPages = [];
 
-    // Listen for popup events before clicking
+    // Listen for the first popup before clicking
     const popupPromise1 = this.page.waitForEvent('popup');
     await this.dreamButton.click();
     const firstPage = await popupPromise1;
     newPages.push(firstPage);
 
-    // The button opens two tabs, wait for the second one
+    // The button opens two tabs, so wait for the second one
     try {
       const popupPromise2 = this.page.waitForEvent('popup', { timeout: 5000 });
       const secondPage = await popupPromise2;
@@ -121,7 +97,7 @@ class HomePage {
       this.logger.warn('Second popup did not open within timeout');
     }
 
-    // Wait for the new pages to load
+    // Give each new page a moment to load
     for (const p of newPages) {
       await p.waitForLoadState('domcontentloaded');
     }
@@ -130,12 +106,9 @@ class HomePage {
     return newPages;
   }
 
-  /**
-   * Get the dream button text.
-   * @returns {Promise<string>} The button text content
-   */
+  // Get the text displayed on the Dream button
   async getDreamButtonText() {
-    // Wait for button to be visible first
+    // Wait for the button to be visible first
     await this.page.waitForFunction(
       () => {
         const el = document.getElementById('dreamButton');

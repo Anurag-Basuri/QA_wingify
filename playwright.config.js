@@ -2,57 +2,55 @@
 const { defineConfig, devices } = require('@playwright/test');
 require('dotenv').config();
 
-/**
- * Playwright configuration for Dream Portal test automation.
- * @see https://playwright.dev/docs/test-configuration
- */
+// Playwright configuration for Dream Portal automated testing
+// See: https://playwright.dev/docs/test-configuration
+
 module.exports = defineConfig({
   testDir: './tests',
   
-  /* Maximum time one test can run */
+  // Each test can run for maximum 30 seconds
   timeout: 30000,
   
-  /* Assertion timeout */
+  // Assertions must complete within 10 seconds
   expect: {
     timeout: 10000,
   },
 
-  /* Run tests sequentially for consistent results */
+  // Run tests one at a time for consistent, reliable results
   fullyParallel: false,
   workers: 1,
 
-
-  /* Fail the build on CI if test.only is left in source code */
+  // Prevent accidentally leaving test.only in the code when running on CI
   forbidOnly: !!process.env.CI,
 
-  /* Retry failed tests once */
+  // Automatically retry failed tests once to reduce flakiness
   retries: 1,
 
-  /* Reporter configuration */
+  // Configure different reporters for test results
   reporter: [
     ['html', { open: 'never' }],
     ['allure-playwright'],
     ['list'],
   ],
 
-  /* Shared settings for all projects */
+  // Global settings applied to all test runs
   use: {
     baseURL: process.env.BASE_URL || 'https://arjitnigam.github.io/myDreams/',
 
-    /* Capture screenshot on failure */
+    // Take screenshots when tests fail for debugging
     screenshot: 'only-on-failure',
 
-    /* Record video on failure */
+    // Record videos of failed tests to see what went wrong
     video: 'retain-on-failure',
 
-    /* Collect trace on failure */
+    // Capture detailed traces for failed tests
     trace: 'retain-on-failure',
 
-    /* Browser viewport */
+    // Standard desktop browser size
     viewport: { width: 1280, height: 720 },
   },
 
-  /* Browser projects */
+  // Define which browsers to test on
   projects: [
     {
       name: 'chromium',

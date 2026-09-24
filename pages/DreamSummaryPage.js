@@ -1,42 +1,27 @@
 const Logger = require('../utils/logger');
 
-/**
- * Page Object Model for the Dreams Summary Page (dreams-total.html).
- * Handles summary statistics table interactions and data extraction.
- */
+// Page Object Model for the Dreams Summary page (dreams-total.html)
+// Handles reading and extracting summary statistics from the table
 class DreamSummaryPage {
-  /**
-   * @param {import('@playwright/test').Page} page - Playwright page instance
-   */
+  // Set up the page instance and create locators for the summary table
   constructor(page) {
     this.page = page;
     this.logger = new Logger('DreamSummaryPage');
 
-    // Locators
+    // Set up locators for all the elements we need
     this.summaryTable = page.locator('#dreamsTotal');
     this.tableRows = page.locator('#dreamsTotal tbody tr');
     this.pageTitle = page.locator('h1');
   }
 
-  /**
-   * Navigate to the Dreams Summary page.
-   */
+  // Navigate to the Dreams Summary page and wait for it to load
   async goto() {
     this.logger.info('Navigating to Dreams Summary page');
     await this.page.goto('dreams-total.html', { waitUntil: 'networkidle' });
     this.logger.info('Dreams Summary page loaded');
   }
 
-
-
-  /**
-   * Get the value for a specific stat from the summary table.
-   * Looks for a row where the first cell matches statName
-   * and returns the second cell's value.
-   *
-   * @param {string} statName - Name of the stat (e.g., "Good Dreams", "Total Dreams")
-   * @returns {Promise<string>} The count value as a string
-   */
+  // Get a specific stat value by looking for the stat name in the first column
   async getStatValue(statName) {
     const rows = await this.tableRows.all();
 
@@ -55,10 +40,7 @@ class DreamSummaryPage {
     throw new Error(`Stat "${statName}" not found in the summary table`);
   }
 
-  /**
-   * Get all stats from the summary table as an object.
-   * @returns {Promise<Object>} Stats object with all summary values
-   */
+  // Extract all stats from the table and return them as an object
   async getAllStats() {
     const stats = {};
     const rows = await this.tableRows.all();
@@ -74,10 +56,7 @@ class DreamSummaryPage {
     return stats;
   }
 
-  /**
-   * Get the page title text.
-   * @returns {Promise<string>} The h1 title text
-   */
+  // Get the page title from the h1 element
   async getPageTitle() {
     return (await this.pageTitle.textContent()).trim();
   }

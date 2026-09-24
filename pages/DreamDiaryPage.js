@@ -1,49 +1,35 @@
 const Logger = require('../utils/logger');
 
-/**
- * Page Object Model for the Dreams Diary Page (dreams-diary.html).
- * Handles dream log table interactions and data extraction.
- */
+// Page Object Model for the Dreams Diary page (dreams-diary.html)
+// Handles all interactions with the dream log table and data extraction
 class DreamDiaryPage {
-  /**
-   * @param {import('@playwright/test').Page} page - Playwright page instance
-   */
+  // Takes a Playwright page instance and sets up locators for the table elements
   constructor(page) {
     this.page = page;
     this.logger = new Logger('DreamDiaryPage');
 
-    // Locators
+    // Set up all the locators we'll need to interact with the table
     this.dreamTable = page.locator('#dreamsDiary');
     this.tableRows = page.locator('#dreamsDiary tbody tr');
     this.tableHeaders = page.locator('#dreamsDiary thead th');
     this.pageTitle = page.locator('h1');
   }
 
-  /**
-   * Navigate to the Dreams Diary page.
-   */
+  // Navigate to the Dreams Diary page and wait for it to load
   async goto() {
     this.logger.info('Navigating to Dreams Diary page');
     await this.page.goto('dreams-diary.html', { waitUntil: 'networkidle' });
     this.logger.info('Dreams Diary page loaded');
   }
 
-
-
-  /**
-   * Get the total number of dream entries in the table.
-   * @returns {Promise<number>} Count of dream rows
-   */
+  // Count how many dream entries are currently in the table
   async getDreamCount() {
     const count = await this.tableRows.count();
     this.logger.info(`Found ${count} dream entries`);
     return count;
   }
 
-  /**
-   * Extract all dream entries from the table.
-   * @returns {Promise<Array<{name: string, daysAgo: string, type: string}>>}
-   */
+  // Get all dream entries from the table and return them as structured objects
   async getDreamEntries() {
     const rows = await this.tableRows.all();
     const entries = [];
@@ -62,38 +48,29 @@ class DreamDiaryPage {
     return entries;
   }
 
-  /**
-   * Get all dream types from the table.
-   * @returns {Promise<string[]>} Array of dream types (e.g., ["Good", "Bad", ...])
-   */
+  // Pull out just the dream types from all entries (Good, Bad, etc.)
   async getDreamTypes() {
     const entries = await this.getDreamEntries();
     return entries.map((entry) => entry.type);
   }
 
-  /**
-   * Get all dream names from the table.
-   * @returns {Promise<string[]>} Array of dream names
-   */
+  // Pull out just the dream names from all entries
   async getDreamNames() {
     const entries = await this.getDreamEntries();
     return entries.map((entry) => entry.name);
   }
 
-  /**
-   * Find recurring dreams (names that appear more than once).
-   * @returns {Promise<string[]>} Array of recurring dream names
-   */
+  // Find dreams that appear more than once in the table
   async getRecurringDreams() {
     const names = await this.getDreamNames();
     const nameCount = {};
 
-    // Count occurrences of each dream name
+    // Count how many times each dream name shows up
     names.forEach((name) => {
       nameCount[name] = (nameCount[name] || 0) + 1;
     });
 
-    // Filter names that appear more than once
+    // Keep only the names that appear more than once
     const recurring = Object.keys(nameCount).filter(
       (name) => nameCount[name] > 1
     );
@@ -102,10 +79,7 @@ class DreamDiaryPage {
     return recurring;
   }
 
-  /**
-   * Get the table column headers.
-   * @returns {Promise<string[]>} Array of header texts
-   */
+  // Get the column headers from the table
   async getTableHeaders() {
     const headers = await this.tableHeaders.all();
     const headerTexts = [];

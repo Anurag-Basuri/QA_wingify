@@ -18,7 +18,7 @@ test.describe('Dream Portal - Home Page', () => {
     // Navigate fresh to catch the loading state (before 3s timeout)
     await page.goto('./', { waitUntil: 'commit' });
 
-    // The loading animation should be visible immediately after page load
+    // The loading animation should be visible right after the page loads
     const isLoading = await page.evaluate(() => {
       const el = document.getElementById('loadingAnimation');
       return el !== null && !el.classList.contains('hidden');
@@ -33,7 +33,7 @@ test.describe('Dream Portal - Home Page', () => {
     // Navigate fresh to see the full loading cycle
     await page.goto('./', { waitUntil: 'commit' });
 
-    // Initially, loading should be visible
+    // Loading should be visible right at the start
     const isLoadingInitially = await page.evaluate(() => {
       const el = document.getElementById('loadingAnimation');
       return el !== null && !el.classList.contains('hidden');

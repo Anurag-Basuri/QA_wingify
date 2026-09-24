@@ -1,23 +1,21 @@
-/**
- * Centralized test data and expected values for Dream Portal tests.
- * Keeping test data separate from test logic for maintainability.
- */
+// Test data and expected values for all Dream Portal tests
+// Keeping this separate from test logic makes it easier to maintain
 
 const TestData = {
-  // URLs
+  // All the URLs we need to test
   urls: {
     home: './',
     dreamDiary: 'dreams-diary.html',
     dreamSummary: 'dreams-total.html',
   },
 
-  // Expected dream count
+  // We expect to find exactly 10 dream entries
   expectedDreamCount: 10,
 
-  // Valid dream types
+  // Only these two types are valid for dreams
   validDreamTypes: ['Good', 'Bad'],
 
-  // Expected summary stats
+  // Expected summary statistics
   expectedStats: {
     'Good Dreams': 6,
     'Bad Dreams': 4,
@@ -26,16 +24,16 @@ const TestData = {
     'Dreams This Week': 7,
   },
 
-  // Expected recurring dream names
+  // Dreams that appear more than once
   expectedRecurringDreams: ['Flying over mountains', 'Lost in maze'],
 
-  // Expected table columns for dream diary
+  // Expected columns in the dream diary table
   expectedDiaryColumns: ['Dream Name', 'Days Ago', 'Dream Type'],
 
-  // Loading animation timeout in milliseconds
+  // Loading animation should disappear after about 3 seconds
   loadingTimeout: 3000,
 
-  // All expected dream entries (for comprehensive validation)
+  // All the dream entries we expect to find in order
   expectedDreamEntries: [
     { name: 'Flying over mountains', daysAgo: '1 day ago', type: 'Good' },
     { name: 'Lost in maze', daysAgo: '2 days ago', type: 'Bad' },

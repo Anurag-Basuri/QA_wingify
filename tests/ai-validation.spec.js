@@ -49,7 +49,7 @@ test.describe('Dream Portal - AI-Based Validation (Bonus)', () => {
       );
     }
 
-    // Log summary
+    // Log all results in a nice table
     console.table(results);
     logger.info(
       `AI Classification Results: ${matchCount}/${entries.length} matched (${mismatchCount} mismatches)`

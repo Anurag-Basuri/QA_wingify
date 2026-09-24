@@ -2,12 +2,9 @@ const Logger = require('./logger');
 
 const logger = new Logger('AIClassifier');
 
-/**
- * AI-powered dream classifier supporting OpenAI, Hugging Face, and heuristic fallback.
- * - OpenAI API: Uses GPT models if OPENAI_API_KEY is configured.
- * - Hugging Face API: Uses zero-shot classification (facebook/bart-large-mnli) if HF_API_TOKEN is configured.
- * - Heuristic Fallback: Rule-based sentiment analysis for instant, reliable offline test runs.
- */
+// AI-powered dream classifier that supports multiple backends
+// Priority order: OpenAI API -> Hugging Face API -> Heuristic fallback
+// This ensures we can classify dreams even if APIs are unavailable
 class AIClassifier {
   constructor() {
     this.openaiApiKey = process.env.OPENAI_API_KEY || '';
@@ -15,23 +12,17 @@ class AIClassifier {
       'https://api-inference.huggingface.co/models/facebook/bart-large-mnli';
     this.hfToken = process.env.HF_API_TOKEN || '';
     this.maxRetries = 1;
-    this.retryDelay = 1500; // ms
+    this.retryDelay = 1500; // milliseconds
     this.apiUnavailable = false;
   }
 
-  /**
-   * Classify a dream name as "Good" or "Bad" using AI.
-   * Priority: OpenAI API -> Hugging Face API -> Heuristic Fallback.
-   *
-   * @param {string} dreamName - The dream name to classify
-   * @returns {Promise<{classification: string, confidence: number, method: string}>}
-   */
+  // Classify a dream as "Good" or "Bad" using the best available method
   async classifyDream(dreamName) {
     if (this.apiUnavailable) {
       return this._classifyWithHeuristic(dreamName);
     }
 
-    // Try OpenAI API if key is present
+    // Try OpenAI first if we have an API key
     if (this.openaiApiKey) {
       try {
         return await this._classifyWithOpenAI(dreamName);
@@ -45,7 +36,7 @@ class AIClassifier {
       }
     }
 
-    // Try Hugging Face API
+    // Try Hugging Face API next
     try {
       return await this._classifyWithHF(dreamName);
     } catch (error) {
@@ -60,11 +51,7 @@ class AIClassifier {
     }
   }
 
-  /**
-   * Classify using OpenAI Chat Completion API.
-   * @param {string} dreamName
-   * @returns {Promise<{classification: string, confidence: number, method: string}>}
-   */
+  // Use the OpenAI Chat Completion API to classify the dream
   async _classifyWithOpenAI(dreamName) {
     const payload = {
       model: 'gpt-4o-mini',
@@ -112,11 +99,7 @@ class AIClassifier {
     };
   }
 
-  /**
-   * Classify using Hugging Face zero-shot classification API.
-   * @param {string} dreamName
-   * @returns {Promise<{classification: string, confidence: number, method: string}>}
-   */
+  // Use Hugging Face zero-shot classification to classify the dream
   async _classifyWithHF(dreamName) {
     const payload = {
       inputs: dreamName,
@@ -135,6 +118,7 @@ class AIClassifier {
 
     let lastError;
 
+    // Retry up to maxRetries times if the model is loading
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
       try {
         const response = await fetch(this.hfApiUrl, {
@@ -144,6 +128,7 @@ class AIClassifier {
           signal: AbortSignal.timeout(4000),
         });
 
+        // Model might be loading, so retry with a delay
         if (response.status === 503) {
           logger.info(
             `Model is loading, retrying in ${this.retryDelay / 1000}s... (attempt ${attempt + 1})`
@@ -181,17 +166,12 @@ class AIClassifier {
     throw lastError;
   }
 
-  /**
-   * Fallback: classify dream using keyword-based heuristic analysis.
-   * Uses positive and negative keyword matching to determine dream type.
-   *
-   * @param {string} dreamName
-   * @returns {{classification: string, confidence: number, method: string}}
-   */
+  // Fallback method: Use keyword matching to classify the dream
+  // This works offline and instantly if all APIs are unavailable
   _classifyWithHeuristic(dreamName) {
     const lowerName = dreamName.toLowerCase();
 
-    // Keywords associated with negative/bad dreams
+    // Keywords that indicate a negative/bad dream
     const badKeywords = [
       'lost',
       'chase',
@@ -213,7 +193,7 @@ class AIClassifier {
       'scream',
     ];
 
-    // Keywords associated with positive/good dreams
+    // Keywords that indicate a positive/good dream
     const goodKeywords = [
       'flying',
       'win',
@@ -238,14 +218,17 @@ class AIClassifier {
     let badScore = 0;
     let goodScore = 0;
 
+    // Count how many negative keywords appear in the dream name
     badKeywords.forEach((keyword) => {
       if (lowerName.includes(keyword)) badScore++;
     });
 
+    // Count how many positive keywords appear in the dream name
     goodKeywords.forEach((keyword) => {
       if (lowerName.includes(keyword)) goodScore++;
     });
 
+    // Classify based on which score is higher
     const classification = badScore > goodScore ? 'Bad' : 'Good';
     const totalMatches = badScore + goodScore;
     const confidence =
@@ -264,11 +247,7 @@ class AIClassifier {
     };
   }
 
-  /**
-   * Sleep utility for retry delays.
-   * @param {number} ms - Milliseconds to sleep
-   * @returns {Promise<void>}
-   */
+  // Simple sleep/delay utility for retry logic
   _sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
